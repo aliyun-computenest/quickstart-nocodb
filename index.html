@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>NocoDB 计算巢部署文档 - Aliyun 计算巢 x NocoDB</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#nocodb">NocoDB 计算巢部署文档</a></li>
+              
+                  <li><a href="#_1">概述</a></li>
+                  
+              
+                  <li><a href="#_2">部署步骤</a></li>
+                  
+                      <li class="li-h3"><a href="#1">1. 打开创建页面</a></li>
+                  
+                      <li class="li-h3"><a href="#2">2. 配置部署参数</a></li>
+                  
+                      <li class="li-h3"><a href="#3">3. 等待部署完成</a></li>
+                  
+                      <li class="li-h3"><a href="#4">4. 登录并使用</a></li>
+                  
+              
+                  <li><a href="#_3">可用性验证</a></li>
+                  
+              
+                  <li><a href="#_4">数据与安全</a></li>
+                  
+              
+                  <li><a href="#_5">资源释放</a></li>
+                  
+              
+                  <li><a href="#_6">官方链接</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="nocodb">NocoDB 计算巢部署文档</h1>
+<h2 id="_1">概述</h2>
+<p><a href="https://github.com/nocodb/nocodb">NocoDB</a> 是可自托管的无代码数据库平台，可将数据组织为智能表格，并提供多种视图、权限控制、Webhook 和 REST API。本方案通过 Docker Compose 将 NocoDB、后台 Worker、PostgreSQL 和 Redis 部署在用户自己的 ECS 中。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务 ID</td>
+<td><code>service-123b67177b2740d1bb3c</code></td>
+</tr>
+<tr>
+<td>部署形态</td>
+<td>单台 ECS + Docker Compose</td>
+</tr>
+<tr>
+<td>应用版本</td>
+<td>NocoDB 2026.07.0</td>
+</tr>
+<tr>
+<td>访问端口</td>
+<td>8080（Web UI 与 API）</td>
+</tr>
+<tr>
+<td>数据存储</td>
+<td>ECS <code>/opt/nocodb</code> 下的 Docker 持久化数据</td>
+</tr>
+<tr>
+<td>数据库与缓存</td>
+<td>PostgreSQL 17 + Redis 7</td>
+</tr>
+<tr>
+<td>实测部署耗时</td>
+<td>约 2 分钟</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">部署步骤</h2>
+<h3 id="1">1. 打开创建页面</h3>
+<p>访问 <a href="https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&amp;ServiceId=service-123b67177b2740d1bb3c">NocoDB 服务实例创建页</a>。</p>
+<p><img alt="创建服务实例" src="images/create-instance.png" /></p>
+<h3 id="2">2. 配置部署参数</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务实例名称</td>
+<td>控制台中用于识别本次部署</td>
+<td>保持默认或自定义</td>
+</tr>
+<tr>
+<td>地域、可用区</td>
+<td>ECS 所在位置</td>
+<td>选择接近使用者且有库存的位置</td>
+</tr>
+<tr>
+<td>付费类型</td>
+<td>按量付费或包年包月</td>
+<td>测试使用按量付费</td>
+</tr>
+<tr>
+<td>实例类型</td>
+<td>ECS 规格</td>
+<td>2 vCPU / 2 GiB 起</td>
+</tr>
+<tr>
+<td>实例密码</td>
+<td>ECS 登录密码</td>
+<td>使用符合页面规则的强密码</td>
+</tr>
+<tr>
+<td>专有网络</td>
+<td>新建或复用 VPC</td>
+<td>首次部署可选择新建</td>
+</tr>
+<tr>
+<td>VPC/交换机网段</td>
+<td>网络地址范围</td>
+<td>无冲突时保持默认</td>
+</tr>
+<tr>
+<td>管理员邮箱</td>
+<td>NocoDB 超级管理员账号</td>
+<td>使用可识别的管理员邮箱</td>
+</tr>
+<tr>
+<td>管理员密码</td>
+<td>NocoDB 超级管理员密码</td>
+<td>使用独立强密码</td>
+</tr>
+</tbody>
+</table>
+<p>管理员密码和 ECS 密码相互独立。请勿在公开文档、工单、日志或代码仓库中记录密码。</p>
+<p>填写完成并看到询价结果后，点击“下一步：确认订单”，核对资源和费用，勾选服务协议并创建实例。</p>
+<h3 id="3">3. 等待部署完成</h3>
+<p>进入服务实例详情页，等待状态变为“已部署”。本次实测从创建到部署完成约 105 秒。</p>
+<p><img alt="服务实例详情" src="images/instance-detail.png" /></p>
+<p>“立即使用”区域会显示：</p>
+<ul>
+<li><code>nocodb_8080_url</code>：NocoDB 访问地址；</li>
+<li><code>QuickStartGuide</code>：登录与使用说明；</li>
+<li><code>DashboardPath</code>：工作台和健康检查路径；</li>
+<li><code>NcAuthJwtSecret</code>：系统自动生成的 JWT 签名密钥，属于敏感信息，请勿复制、分享或写入公开材料。</li>
+</ul>
+<h3 id="4">4. 登录并使用</h3>
+<p>打开 <code>nocodb_8080_url</code>，使用部署时填写的管理员邮箱和管理员密码登录。登录后可创建 Base、数据表、字段和记录。</p>
+<p>发布前实测已完成以下验证：</p>
+<ol>
+<li>创建 Base“客户项目跟踪”；</li>
+<li>创建数据表“项目”；</li>
+<li>新增“官网改版”和“移动端优化”两条记录；</li>
+<li>刷新页面后确认 Base、表和记录仍然存在。</li>
+</ol>
+<p><img alt="NocoDB 数据表" src="images/service-page.png" /></p>
+<h2 id="_3">可用性验证</h2>
+<table>
+<thead>
+<tr>
+<th>验证项</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务实例</td>
+<td>状态为“已部署”</td>
+</tr>
+<tr>
+<td>应用访问</td>
+<td>NocoDB 登录页和工作台正常加载</td>
+</tr>
+<tr>
+<td>身份认证</td>
+<td>管理员账号可正常登录</td>
+</tr>
+<tr>
+<td>Base 与数据表</td>
+<td>可正常创建</td>
+</tr>
+<tr>
+<td>数据读写</td>
+<td>两条测试记录成功保存</td>
+</tr>
+<tr>
+<td>数据持久化</td>
+<td>刷新页面后数据仍存在</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">数据与安全</h2>
+<ul>
+<li>NocoDB、PostgreSQL 和 Redis 数据保存在 ECS 的 Docker 持久化数据中；删除 ECS 或服务实例前请先导出或备份重要数据。</li>
+<li>应用启用了管理员登录认证，但默认访问链路为公网 HTTP 8080。生产环境建议限制安全组来源，并配置 HTTPS 反向代理。</li>
+<li>管理员密码、ECS 密码和 JWT 签名密钥均属于敏感信息，不应写入文档、日志或公开仓库。</li>
+<li>建议定期备份 PostgreSQL 数据，并在升级 NocoDB 前验证备份可恢复。</li>
+<li>NocoDB 使用 Sustainable Use License，生产或商业使用前请阅读并遵守官方许可证条款。</li>
+</ul>
+<h2 id="_5">资源释放</h2>
+<p>不再使用时，在计算巢服务实例详情页执行“删除”。删除完成后建议继续确认：</p>
+<ol>
+<li>服务实例已不存在；</li>
+<li>ROS 资源栈状态为 <code>DELETE_COMPLETE</code>；</li>
+<li>ECS、VPC、交换机和安全组均无残留；</li>
+<li>账单中不再产生相关按量资源费用。</li>
+</ol>
+<p>删除服务实例会同时删除 ECS 及其本地数据，请提前导出或备份 Base、表结构、记录和应用配置。</p>
+<h2 id="_6">官方链接</h2>
+<ul>
+<li><a href="https://github.com/nocodb/nocodb">NocoDB 官方仓库</a></li>
+<li><a href="https://docs.nocodb.com/">NocoDB 官方文档</a></li>
+<li><a href="https://docs.nocodb.com/getting-started/self-hosted/">NocoDB 自托管文档</a></li>
+<li><a href="https://github.com/nocodb/nocodb/blob/develop/LICENSE.md">NocoDB 许可证</a></li>
+<li><a href="https://help.aliyun.com/zh/compute-nest/">阿里云计算巢文档</a></li>
+</ul>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2026-10-13 02:58:38.604972+00:00
+  -->
+</body>
+</html>
